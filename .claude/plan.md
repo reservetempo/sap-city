@@ -29,18 +29,14 @@ Tile (x, z) has its center at world (x − 15.5, 0, z − 15.5); the grass is th
 - `src/input.js` (the only owner of pointer and wheel listeners): `initInput(canvas, camera)`, `on('tap' | 'hover', fn)` → unsubscribe. Tap gives `{tile, clientX, clientY, pointerType}`; hover is mouse only and fires on tile change. `setDragHandler({dragstart, dragmove, dragend} | null)` claims one-finger / left-mouse drags; events give `{tile, clientX, clientY, pointerType, cancelled}`, and `dragstart.tile` is the pointer-down tile. `pickTile(clientX, clientY)`. Any `tile` is `{x, z}` or `null`.
 - `index.html` has an empty `#ui` overlay (inset by safe areas) for the toolbar. `src/main.js` sets `window.sapCity = {renderer, scene, camera}` for console inspection, and has a `// TEMP` tap-highlight that task 3 removes.
 
+### Existing code API (from task 2)
+
+- `src/catalog.js`: `BUILDINGS` (10 entries `{id, code, name, tier, size, color}`; ids `and, or, not, xor, half-adder, full-adder, flip-flop, register, alu, memory`), `TIERS` (`[{tier, label, size}]`: Gates / Adders & latches / Units), `getBuilding(id)`.
+- `src/tools.js`: `getState()`, `setState(partial)` (validates; rotation wraps 0–3; `'build'` needs a building), `subscribe(fn)` → calls `fn(state, prev)`, returns unsubscribe. Also `TOOLS`, `selectTool(tool)`, `selectBuilding(id)`, `rotate(step = 1)`. Console access: `await import('/src/tools.js')`.
+- `src/ui.js`: `initUI(root)` → `{toolbar, actions, destroy}`; `actions` is an empty slot at the right end of row 1 reserved for task 5's Clear button. Called once from `main.js`.
+- Toolbar is 118 px tall at 375×812 and floats 8 px above the bottom safe-area inset (covers the bottom ~126 px of the canvas).
+
 ## Next
-
-### 2. Building catalog and toolbar UI
-
-Add the building catalog and a phone toolbar for choosing a tool. Files: `src/catalog.js`, `src/tools.js`, `src/ui.js`, `style.css`, `index.html` (markup hook only), `src/main.js` (one-line wiring).
-
-- `src/catalog.js`: data only. Each entry `{ id, code, name, tier, size, color }` for the ten buildings in the project context (codes: AND, OR, NOT, XOR, HA, FA, FF, REG, ALU, MEM; sizes 1/2/3 by tier). Give each building a distinct flat color, with each tier sharing a hue family so tiers read as groups. Export the list and a `getBuilding(id)` lookup.
-- `src/tools.js`: tiny state store with `subscribe`. State: `tool` (`'pan' | 'road' | 'erase' | 'build'`), `buildingId` (when tool is `build`), `rotation` (0/1/2/3 quarter turns). Default tool `pan`.
-- `src/ui.js`: bottom toolbar fixed to the screen, above the safe-area inset, thumb-friendly (44 px minimum hit areas). Row 1: Pan, Road, Erase, and Rotate (rotate cycles `rotation` and its icon shows the current facing). Row 2: horizontally scrolling building picker grouped by tier with small tier labels; each card shows a color swatch, the code and the name. The active tool or building is clearly highlighted. Use simple inline SVG or text icons, no icon library. The toolbar must not let touches fall through to the canvas.
-- Nothing needs to happen on the grid yet when a tool is picked.
-
-Done when: on a 375×812 viewport the toolbar looks clean, the picker scrolls sideways, picking tools updates the highlight and state, the canvas still pans above the toolbar, and there are no console errors.
 
 ### 3. Place, rotate and erase buildings
 
@@ -78,3 +74,4 @@ Done when: placing buildings and roads, reloading, and seeing the same city work
 
 - Initial repo and GitHub Pages setup — `e217f53` — placeholder page live at https://reservetempo.github.io/sap-city/
 - 1. Scaffold the 3D scene, camera gestures and tile picking — `6e1ae44` — 32×32 voxel island, custom touch/mouse camera, pointer router with tile picking (touch tested with synthetic events only)
+- 2. Building catalog and toolbar UI — `28deb9b` — ten-building catalog in three tiers, tool state store, two-row phone toolbar with tier-grouped picker (look not yet checked on a real phone)
