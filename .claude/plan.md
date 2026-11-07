@@ -60,17 +60,13 @@ Tile (x, z) has its center at world (x − 15.5, 0, z − 15.5); the grass is th
 - Gate labels are about 32 px wide at the default phone zoom, more than a 22 px tile, so labels on gates placed side by side overlap. Fine for placeholders, or shrink/hide them?
 - A press held still for more than 400 ms places nothing (a building or a road), because `input.js` only counts quick presses as taps. Should a long press also place?
 
+### Existing code API (from task 5)
+
+- `src/storage.js`: city saved to `localStorage` key `sap-city:v1` (`city.getState()`), camera view to `sap-city:view:v1`, both on a 300 ms debounce and flushed on `pagehide` / hidden. Loaded on startup; invalid data → empty city plus one `console.warn` (stays in storage until the next change overwrites it). Clear button lives in the toolbar's `actions` slot; it doesn't reset the camera.
+
 ## Next
 
-### 5. Autosave and Clear
-
-Persist the city in the browser. Files: `src/storage.js`, `src/main.js`, `src/ui.js`, `style.css`.
-
-- `src/storage.js`: save `city.getState()` (`{ version: 1, objects: [...] }`, buildings and roads together) to `localStorage` under `sap-city:v1`, debounced to about 300 ms after each change. Load on startup before the first render. Wrap every read and write in try/catch; if storage is unavailable or the saved data is invalid, start with an empty city and log one warning. Ignore saved buildings whose type isn't in the catalog.
-- Clear button: add it to the toolbar (visually separate from the tools, e.g. at the end of row 1) that asks with `confirm()` and then clears the city and the saved data.
-- Optional if simple: also save and restore the camera target/zoom/angle.
-
-Done when: placing buildings and roads, reloading, and seeing the same city works; Clear empties the city and survives a reload; corrupt saved data doesn't break the page; no console errors.
+(empty)
 
 ## Done
 
@@ -79,3 +75,4 @@ Done when: placing buildings and roads, reloading, and seeing the same city work
 - 2. Building catalog and toolbar UI — `28deb9b` — ten-building catalog in three tiers, tool state store, two-row phone toolbar with tier-grouped picker (look not yet checked on a real phone)
 - 3. Place, rotate and erase buildings — `b1e4366` — city data model, placeholder voxel buildings with door and code label, tap-to-place with hover/red-flash ghost, erase
 - 4. Paint and erase roads — `dbeeacb` — drag/tap road painting with 4-connected gap filling, auto-connecting road pieces, roads skip buildings and round-trip through city state
+- 5. Autosave and Clear — `faaaba9` — city and camera view autosave to browser storage, red Clear button with confirm, corrupt saves fall back to an empty city
