@@ -67,3 +67,176 @@ body {
 }
 #fallback[hidden] { display: none; }
 #fallback p { max-width: 28em; margin: 0; }
+
+/* ---------- Toolbar (bottom, above the home bar) ---------- */
+.toolbar {
+  position: absolute;
+  left: calc(var(--safe-left) + 8px);
+  right: calc(var(--safe-right) + 8px);
+  bottom: calc(var(--safe-bottom) + 8px);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 18px rgba(18, 48, 74, 0.22);
+  touch-action: manipulation;   /* taps only: no double-tap zoom */
+}
+
+.toolbar button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  font: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.toolbar button:focus { outline: none; }
+.toolbar button:focus-visible { outline: 2px solid #2f6fe0; outline-offset: 2px; }
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tool {
+  flex: none;
+  min-width: 52px;
+  height: 44px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.tool .icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tool-label {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+.tool[aria-pressed="true"] {
+  background: var(--ink);
+  color: #fff;
+}
+.icon-rotate { transition: transform 0.2s ease; }
+
+.toolbar-sep {
+  flex: none;
+  width: 1px;
+  height: 26px;
+  margin: 0 2px;
+  background: rgba(18, 48, 74, 0.15);
+}
+
+/* Right end of row 1, kept free for later buttons (e.g. Clear). */
+.toolbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Building picker: scrolls sideways. pan-x lets touch scroll it while the
+   canvas keeps touch-action: none. */
+.picker {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 2px;
+}
+.picker::-webkit-scrollbar { display: none; }
+
+.picker-tier {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.picker-label {
+  position: sticky;   /* stays visible while its group scrolls past */
+  left: 0;
+  align-self: flex-start;
+  padding: 0 2px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(18, 48, 74, 0.6);
+}
+.picker-cards {
+  display: flex;
+  gap: 4px;
+}
+
+.card {
+  flex: none;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 0 6px;
+  border: 2px solid rgba(18, 48, 74, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+}
+.card[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--c) 16%, #fff);
+}
+.card-swatch {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  background: var(--c);
+  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.18);   /* a little voxel side face */
+}
+.card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.card-code {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+.card-name {
+  font-size: 10px;
+  line-height: 1.1;
+  white-space: nowrap;
+  color: rgba(18, 48, 74, 0.7);
+}
+
+@media (hover: hover) {
+  .tool:not([aria-pressed="true"]):hover { background: rgba(18, 48, 74, 0.08); }
+  .card:not([aria-pressed="true"]):hover { border-color: rgba(18, 48, 74, 0.28); }
+}

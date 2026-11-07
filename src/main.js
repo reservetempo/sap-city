@@ -1,14 +1,16 @@
-// main.js: wires the scene, camera controls and input together and runs the render loop.
+// main.js: wires the scene, camera controls, input and toolbar together and runs the render loop.
 import * as THREE from 'three';
 import { createScene, tileToWorld } from './scene.js';
 import { initControls } from './controls.js';
 import { initInput, on } from './input.js';
+import { initUI } from './ui.js';
 
 function start() {
   const container = document.getElementById('app');
   const { renderer, scene, camera } = createScene(container);
   initControls(camera, renderer.domElement);
   initInput(renderer.domElement, camera);
+  initUI(document.getElementById('ui'));
 
   // TEMP: highlight the tapped tile to check picking. A later task removes this.
   const highlight = new THREE.Mesh(
