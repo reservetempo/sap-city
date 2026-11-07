@@ -148,13 +148,14 @@ body {
   background: rgba(18, 48, 74, 0.15);
 }
 
-/* Right end of row 1, kept free for later buttons (e.g. Clear). */
+/* Right end of row 1: actions such as Clear, apart from the tools. */
 .toolbar-actions {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 4px;
 }
+.toolbar .tool-danger { color: #b3322a; }
 
 /* Building picker: scrolls sideways. pan-x lets touch scroll it while the
    canvas keeps touch-action: none. */
@@ -239,4 +240,5 @@ body {
 @media (hover: hover) {
   .tool:not([aria-pressed="true"]):hover { background: rgba(18, 48, 74, 0.08); }
   .card:not([aria-pressed="true"]):hover { border-color: rgba(18, 48, 74, 0.28); }
+  .tool.tool-danger:hover { background: rgba(179, 50, 42, 0.1); }
 }

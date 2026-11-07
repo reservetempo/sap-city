@@ -13,6 +13,7 @@ const ICONS = {
   // Points "up" at rotation 0; the whole icon turns with the rotation.
   rotate: '<rect x="4" y="4" width="16" height="16" rx="3"/>'
     + '<path d="M12 6.5l4.5 5h-3v5.5h-3v-5.5h-3z" fill="currentColor" stroke="none"/>',
+  clear: '<path d="M4 7h16M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10 11v5.5M14 11v5.5"/>',
 };
 
 const TOOL_BUTTONS = [
@@ -48,9 +49,24 @@ function toolButton(name, label) {
 }
 
 /**
+ * A Clear button for the toolbar's `actions` slot. It asks first, then calls
+ * onClear().
+ */
+export function createClearButton(onClear) {
+  const btn = toolButton('clear', 'Clear');
+  btn.classList.add('tool-danger');
+  btn.removeAttribute('data-tool');
+  btn.setAttribute('aria-label', 'Clear the whole city');
+  btn.addEventListener('click', () => {
+    if (window.confirm('Clear the whole city? This cannot be undone.')) onClear();
+  });
+  return btn;
+}
+
+/**
  * Build the toolbar inside `root` (the #ui overlay).
- * Returns { toolbar, actions, destroy }: `actions` is the empty right-hand end
- * of row 1, kept free for later buttons (e.g. Clear).
+ * Returns { toolbar, actions, destroy }: `actions` is the right-hand end of
+ * row 1, for action buttons such as the one from createClearButton().
  */
 export function initUI(root = document.getElementById('ui')) {
   const toolbar = el('nav', 'toolbar', { 'aria-label': 'Toolbar' });

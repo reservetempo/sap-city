@@ -1,15 +1,16 @@
-// main.js: wires the scene, camera controls, input, toolbar, city, placement and
-// roads together and runs the render loop.
+// main.js: wires the scene, camera controls, input, toolbar, city, placement,
+// roads and autosave together and runs the render loop.
 import * as THREE from 'three';
 import { createScene } from './scene.js';
-import { initControls } from './controls.js';
+import { initControls, getView, setView } from './controls.js';
 import { initInput } from './input.js';
-import { initUI } from './ui.js';
+import { initUI, createClearButton } from './ui.js';
 import * as city from './city.js';
 import { createBuildingMesh } from './buildingMeshes.js';
 import { initPlacement } from './placement.js';
 import { initRoads } from './roads.js';
 import { initRoadTool } from './roadTool.js';
+import { initStorage } from './storage.js';
 
 /** Keeps one mesh per city object in `parent`, following city change events.
  *  Roads are not here: roads.js keeps its own layer, since a road's shape depends on its neighbours. */
@@ -48,7 +49,7 @@ function start() {
   const { renderer, scene, camera } = createScene(container);
   initControls(camera, renderer.domElement);
   initInput(renderer.domElement, camera);
-  initUI(document.getElementById('ui'));
+  const ui = initUI(document.getElementById('ui'));
 
   const cityGroup = new THREE.Group();
   cityGroup.name = 'city';
@@ -58,10 +59,14 @@ function start() {
   initPlacement(scene);
   initRoadTool();
 
+  // Restore the saved city and view before the first frame, then autosave.
+  const storage = initStorage({ city, getView, setView });
+  ui.actions.append(createClearButton(storage.clear));
+
   renderer.setAnimationLoop(() => renderer.render(scene, camera));
 
   // Handle for poking at the game from the browser console.
-  window.sapCity = { renderer, scene, camera, city };
+  window.sapCity = { renderer, scene, camera, city, storage };
 }
 
 try {
