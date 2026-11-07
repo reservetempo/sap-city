@@ -48,23 +48,19 @@ Tile (x, z) has its center at world (x − 15.5, 0, z − 15.5); the grass is th
 - `src/main.js`: one mesh per city object via `city.subscribe`, using a kind → mesh-maker table (add `road` there). `window.sapCity` includes `city`.
 - Rotation 0 faces north (world −Z); each step turns a quarter clockwise seen from above (1 east, 2 south, 3 west). The front shows a dark door and a light roof ledge.
 
+### Existing code API (from task 4)
+
+- `src/city.js`: `placeRoad(x, z)` → object or null, `isRoad(x, z)`. Roads are `{id, kind: 'road', x, z}` and round-trip through `getState` / `loadState` / `clear`; `removeAt` removes roads too.
+- `src/roads.js`: `initRoads(parent)` adds a "roads" layer that listens to city events itself (16 shared shape geometries, one material).
+- `src/roadTool.js`: `initRoadTool()` claims drags and turns off one-finger pan while the road tool is selected; `line4(x0, z0, x1, z1)` fills gaps with 4-connected tiles.
+
 ## Open questions for the user
 
 - Rotation 0 faces away from the default camera, so new buildings show their back (only the roof ledge shows the facing). Should the default be south, toward the camera? (That would also change the rotate icon and labels in `ui.js`.)
 - Gate labels are about 32 px wide at the default phone zoom, more than a 22 px tile, so labels on gates placed side by side overlap. Fine for placeholders, or shrink/hide them?
+- A press held still for more than 400 ms places nothing (a building or a road), because `input.js` only counts quick presses as taps. Should a long press also place?
 
 ## Next
-
-### 4. Paint and erase roads
-
-Make the road tool work. Files: `src/roads.js`, `src/city.js` (road support), `src/placement.js` (erase covers roads), `src/main.js`.
-
-- `src/city.js`: add roads as one-tile objects: `placeRoad(x, z)` (only if the tile is free), and `removeAt` also removes roads. Roads and buildings never overlap. Include roads in `getState` / `loadState` / `clear`.
-- `src/roads.js`: road meshes that auto-connect to neighboring road tiles (4 neighbors): isolated, dead end, straight, corner, T and cross. Gray asphalt slab barely above the grass, with simple light lane markings or curbs built from thin boxes so the shape reads clearly. When a road is added or removed, update its neighbors' pieces too. No connection to buildings (no game rules).
-- Painting: when the road tool is selected, claim one-finger drags through `src/input.js` and call `setOneFingerPan(false)` in `src/controls.js`; turn it back on when leaving the road tool. Dragging lays road on each tile the finger crosses, skipping occupied tiles, and fills gaps when the finger skips tiles so roads stay 4-connected (diagonal moves add an in-between tile). A single tap also places one road tile. Two-finger gestures still move the camera.
-- Erase tool: a tap removes a road tile too.
-
-Done when: dragging paints a continuous road that forms correct straights, corners, T-junctions and crossings, roads go around buildings without overwriting them, erasing a road re-shapes its neighbors, the camera still pans with two fingers in road mode and with one finger in pan mode, and there are no console errors.
 
 ### 5. Autosave and Clear
 
@@ -82,3 +78,4 @@ Done when: placing buildings and roads, reloading, and seeing the same city work
 - 1. Scaffold the 3D scene, camera gestures and tile picking — `6e1ae44` — 32×32 voxel island, custom touch/mouse camera, pointer router with tile picking (touch tested with synthetic events only)
 - 2. Building catalog and toolbar UI — `28deb9b` — ten-building catalog in three tiers, tool state store, two-row phone toolbar with tier-grouped picker (look not yet checked on a real phone)
 - 3. Place, rotate and erase buildings — `b1e4366` — city data model, placeholder voxel buildings with door and code label, tap-to-place with hover/red-flash ghost, erase
+- 4. Paint and erase roads — `dbeeacb` — drag/tap road painting with 4-connected gap filling, auto-connecting road pieces, roads skip buildings and round-trip through city state
