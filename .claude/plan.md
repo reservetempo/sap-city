@@ -36,18 +36,24 @@ Tile (x, z) has its center at world (x − 15.5, 0, z − 15.5); the grass is th
 - `src/ui.js`: `initUI(root)` → `{toolbar, actions, destroy}`; `actions` is an empty slot at the right end of row 1 reserved for task 5's Clear button. Called once from `main.js`.
 - Toolbar is 118 px tall at 375×812 and floats 8 px above the bottom safe-area inset (covers the bottom ~126 px of the canvas).
 
+### Existing code API (from task 3)
+
+- `src/city.js` (no three.js): `CITY_SIZE` (32), `canPlaceBuilding(type, x, z)`, `placeBuilding(type, x, z, rotation = 0)` → object or null, `removeAt(x, z)` → object or null, `objectAt(x, z)`, `getObjects()`, `sizeOf(obj)`, `getState()`, `loadState(state)` → count loaded (skips overlapping/invalid entries, sends one reset event), `clear()`, `subscribe(fn)` → unsubscribe.
+  - Objects are frozen `{id, kind: 'building', type, x, z, rotation}` with integer `id`; `(x, z)` is the footprint's min corner.
+  - `getState()` → `{version: 1, objects: [{id, kind, type, x, z, rotation}, ...]}`.
+  - Events: `{type: 'add', object}`, `{type: 'remove', object}`, `{type: 'reset', objects}` (after `loadState` and `clear`).
+  - Adding roads: one entry in the `KINDS` table (size, plus `fromData`) and a `placeRoad` that calls `insert`.
+- `src/buildingMeshes.js`: `createBuildingMesh({type, x, z, rotation})` → positioned `THREE.Group` (all shared resources, nothing to dispose); `createGhost()` → `{object, show(type, x, z, rotation, valid), hide()}`.
+- `src/placement.js`: `initPlacement(scene)`, `footprintOrigin(type, tile)` → `{x, z}`. Handles build-tool taps, hover ghost, 0.6 s red flash, and erase-tool taps.
+- `src/main.js`: one mesh per city object via `city.subscribe`, using a kind → mesh-maker table (add `road` there). `window.sapCity` includes `city`.
+- Rotation 0 faces north (world −Z); each step turns a quarter clockwise seen from above (1 east, 2 south, 3 west). The front shows a dark door and a light roof ledge.
+
+## Open questions for the user
+
+- Rotation 0 faces away from the default camera, so new buildings show their back (only the roof ledge shows the facing). Should the default be south, toward the camera? (That would also change the rotate icon and labels in `ui.js`.)
+- Gate labels are about 32 px wide at the default phone zoom, more than a 22 px tile, so labels on gates placed side by side overlap. Fine for placeholders, or shrink/hide them?
+
 ## Next
-
-### 3. Place, rotate and erase buildings
-
-Make the build and erase tools work for buildings. Files: `src/city.js`, `src/buildingMeshes.js`, `src/placement.js`, `src/main.js`.
-
-- `src/city.js`: the city data model, independent of three.js. A tile occupancy map plus a list of objects. Buildings `{ id, type, x, z, rotation }` where `(x, z)` is the footprint's minimum corner. Roads will also live here in task 4 (plan for a `road` kind that occupies one tile). Functions: `canPlaceBuilding(type, x, z)` (in bounds and every footprint tile free), `placeBuilding`, `removeAt(x, z)` (removes the whole object covering that tile), `objectAt(x, z)`, `getState()`, `loadState(state)`, `clear()`, and a change `subscribe` so rendering and (later) saving can react.
-- `src/buildingMeshes.js`: placeholder voxel meshes built from catalog data. Footprint `size × size` tiles with a small inset so neighbors read as separate; height grows with tier; a stepped roof or one or two voxel details at most; a door or front marker on the facing side so rotation is visible; a camera-facing text label (canvas-texture sprite) showing the code, readable at the default zoom. Cast and receive shadows. Share geometries/materials where easy.
-- `src/placement.js`: with the build tool on, a tap places the selected building with its footprint centered on the tapped tile (for even sizes, the tapped tile is the one just up-left of center). Valid → place it. Blocked or out of bounds → show a red ghost of the footprint for about 0.6 s and place nothing. With a mouse, a ghost follows the hover (green when valid, red when not). The ghost uses the current rotation. With the erase tool on, a tap removes the building under the tile. Pan and road tools ignore taps here.
-- `src/main.js`: remove the temporary tap highlight from task 1, wire in city, meshes and placement; keep meshes in sync with the city through its `subscribe`.
-
-Done when: every building in the picker can be placed at its footprint size, overlap and out-of-bounds placement are refused with the red ghost, rotation shows on the door/front, erase removes a whole building from any of its tiles, and there are no console errors.
 
 ### 4. Paint and erase roads
 
@@ -64,7 +70,7 @@ Done when: dragging paints a continuous road that forms correct straights, corne
 
 Persist the city in the browser. Files: `src/storage.js`, `src/main.js`, `src/ui.js`, `style.css`.
 
-- `src/storage.js`: save the city state to `localStorage` under `sap-city:v1` as `{ version: 1, buildings: [...], roads: [...] }`, debounced to about 300 ms after each change. Load on startup before the first render. Wrap every read and write in try/catch; if storage is unavailable or the saved data is invalid, start with an empty city and log one warning. Ignore saved buildings whose type isn't in the catalog.
+- `src/storage.js`: save `city.getState()` (`{ version: 1, objects: [...] }`, buildings and roads together) to `localStorage` under `sap-city:v1`, debounced to about 300 ms after each change. Load on startup before the first render. Wrap every read and write in try/catch; if storage is unavailable or the saved data is invalid, start with an empty city and log one warning. Ignore saved buildings whose type isn't in the catalog.
 - Clear button: add it to the toolbar (visually separate from the tools, e.g. at the end of row 1) that asks with `confirm()` and then clears the city and the saved data.
 - Optional if simple: also save and restore the camera target/zoom/angle.
 
@@ -75,3 +81,4 @@ Done when: placing buildings and roads, reloading, and seeing the same city work
 - Initial repo and GitHub Pages setup — `e217f53` — placeholder page live at https://reservetempo.github.io/sap-city/
 - 1. Scaffold the 3D scene, camera gestures and tile picking — `6e1ae44` — 32×32 voxel island, custom touch/mouse camera, pointer router with tile picking (touch tested with synthetic events only)
 - 2. Building catalog and toolbar UI — `28deb9b` — ten-building catalog in three tiers, tool state store, two-row phone toolbar with tier-grouped picker (look not yet checked on a real phone)
+- 3. Place, rotate and erase buildings — `b1e4366` — city data model, placeholder voxel buildings with door and code label, tap-to-place with hover/red-flash ghost, erase
