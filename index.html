@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sap City</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --fg: #1d1c1a;
+      --muted: #6b6860;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #161614;
+        --fg: #ecebe6;
+        --muted: #9a978e;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+    }
+    main { text-align: center; }
+    h1 {
+      font-size: clamp(2.5rem, 10vw, 5rem);
+      letter-spacing: -0.03em;
+      margin: 0 0 0.25em;
+    }
+    p { color: var(--muted); margin: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sap City</h1>
+    <p>Under construction.</p>
+  </main>
+</body>
+</html>
