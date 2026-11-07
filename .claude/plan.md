@@ -20,22 +20,16 @@ Sap City is a phone-first web game for learning computer architecture through ci
 - Touch: with the road tool on, one-finger drag paints road; otherwise one finger pans. Two fingers always pan, pinch-zoom and twist-rotate.
 - Autosave the city to the phone's browser storage after every change, with a Clear button to start over.
 
+### Existing code API (from task 1)
+
+Tile (x, z) has its center at world (x − 15.5, 0, z − 15.5); the grass is the plane y = 0.
+
+- `src/scene.js`: `GRID_SIZE`, `tileToWorld(x, z, out?)` → `Vector3`, `worldToTile(point)` → `{x, z}` or `null`, `screenToGround(camera, canvas, clientX, clientY, out?)`, `createScene(container)` → `{renderer, scene, camera}`.
+- `src/controls.js` (adds no listeners itself): `initControls(camera, canvas)`, `setOneFingerPan(enabled)`, `resetView()`, `getView()` → `{x, z, distance, yaw}`, `setView(view)`. Gesture functions `pointerDown/pointerMove/pointerUp/zoomAt` are called only by `input.js`.
+- `src/input.js` (the only owner of pointer and wheel listeners): `initInput(canvas, camera)`, `on('tap' | 'hover', fn)` → unsubscribe. Tap gives `{tile, clientX, clientY, pointerType}`; hover is mouse only and fires on tile change. `setDragHandler({dragstart, dragmove, dragend} | null)` claims one-finger / left-mouse drags; events give `{tile, clientX, clientY, pointerType, cancelled}`, and `dragstart.tile` is the pointer-down tile. `pickTile(clientX, clientY)`. Any `tile` is `{x, z}` or `null`.
+- `index.html` has an empty `#ui` overlay (inset by safe areas) for the toolbar. `src/main.js` sets `window.sapCity = {renderer, scene, camera}` for console inspection, and has a `// TEMP` tap-highlight that task 3 removes.
+
 ## Next
-
-### 1. Scaffold the 3D scene, camera gestures and tile picking
-
-Replace the placeholder `index.html` with the app shell and build the scene. Files: `index.html`, `style.css`, `src/main.js`, `src/scene.js`, `src/controls.js`, `src/input.js`, `.claude/launch.json`, `README.md`.
-
-- `.claude/launch.json`: `{"version":"0.0.1","configurations":[{"name":"static","runtimeExecutable":"python","runtimeArgs":["-m","http.server","8010"],"port":8010}]}`.
-- `index.html`: import map as in the project context, viewport meta with `viewport-fit=cover` and no user scaling, full-screen canvas container, a fallback message if import maps aren't supported.
-- `style.css`: full-screen, no page scroll, `touch-action: none` and `overscroll-behavior: none` on the canvas (no pull-to-refresh, no double-tap zoom), respects safe-area insets.
-- `src/scene.js`: renderer (pixel ratio capped at 2, shadows on, resizes on window resize and orientation change), sky-colored background, hemisphere + directional light with soft shadows, a 32×32 grass ground with subtle visible tile lines, slightly raised dirt edge around it. Export helpers `tileToWorld(x, z)` (tile center in world space) and `worldToTile(point)` (returns `{x, z}` or `null` outside the grid). Document the coordinate convention in a comment.
-- `src/controls.js`: a small custom camera controller (not OrbitControls, so one-finger behavior can be switched later). Perspective camera looking down at about 50°, orbiting a ground target. Touch: one finger pans; two fingers pan (midpoint move), pinch-zoom (distance) and twist-rotate around the vertical axis, all at once. Mouse: left-drag pans, right-drag rotates, wheel zooms. Clamp zoom distance and keep the target inside the grid. Export a way to turn one-finger pan off and on (`setOneFingerPan(enabled)`).
-- `src/input.js`: pointer router on the canvas. Classifies a one-finger touch or left-click as a **tap** (moved < 10 px, < 400 ms) or a **drag**. Emits `tap` with the tile under the pointer, and `dragstart` / `dragmove` / `dragend` with tiles, but only to a drag handler that has claimed one-finger drags; otherwise one-finger drags go to the camera. Also emits `hover` (mouse only) with the tile. Raycasts against the ground plane using `worldToTile`. Keep the API small and documented at the top of the file, since tasks 3 and 4 build on it.
-- `src/main.js`: wires it together and runs the render loop. As a temporary check, highlight the tapped tile with a translucent box (task 3 removes it).
-- `README.md`: update the project description (one paragraph: what Sap City is, that placement is the only feature for now), file layout, and run locally on port 8010.
-
-Done when: on a 375×812 viewport the grid fills the view, a tap highlights the right tile, pan/zoom/rotate work by mouse (and touch gestures are implemented), and there are no console errors.
 
 ### 2. Building catalog and toolbar UI
 
@@ -83,3 +77,4 @@ Done when: placing buildings and roads, reloading, and seeing the same city work
 ## Done
 
 - Initial repo and GitHub Pages setup — `e217f53` — placeholder page live at https://reservetempo.github.io/sap-city/
+- 1. Scaffold the 3D scene, camera gestures and tile picking — `6e1ae44` — 32×32 voxel island, custom touch/mouse camera, pointer router with tile picking (touch tested with synthetic events only)
