@@ -1,5 +1,5 @@
-// main.js: wires the scene, camera controls, input, toolbar, city and placement
-// together and runs the render loop.
+// main.js: wires the scene, camera controls, input, toolbar, city, placement and
+// roads together and runs the render loop.
 import * as THREE from 'three';
 import { createScene } from './scene.js';
 import { initControls } from './controls.js';
@@ -8,8 +8,11 @@ import { initUI } from './ui.js';
 import * as city from './city.js';
 import { createBuildingMesh } from './buildingMeshes.js';
 import { initPlacement } from './placement.js';
+import { initRoads } from './roads.js';
+import { initRoadTool } from './roadTool.js';
 
-/** Keeps one mesh per city object in `parent`, following city change events. */
+/** Keeps one mesh per city object in `parent`, following city change events.
+ *  Roads are not here: roads.js keeps its own layer, since a road's shape depends on its neighbours. */
 function syncCityMeshes(parent) {
   const makers = { building: createBuildingMesh }; // kind -> (object) => Object3D
   const meshes = new Map(); // object id -> Object3D
@@ -51,7 +54,9 @@ function start() {
   cityGroup.name = 'city';
   scene.add(cityGroup);
   syncCityMeshes(cityGroup);
+  initRoads(cityGroup);
   initPlacement(scene);
+  initRoadTool();
 
   renderer.setAnimationLoop(() => renderer.render(scene, camera));
 

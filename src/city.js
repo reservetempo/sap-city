@@ -5,13 +5,15 @@
 //             type: a catalog id; (x, z): the footprint's minimum corner, so it
 //             covers x..x+size-1 and z..z+size-1; rotation: 0..3 quarter turns
 //             clockwise seen from above (0 faces north, i.e. towards tile z - 1).
-//   road      { id, kind: 'road', x, z }   one tile; added in task 4 (see KINDS).
+//   road      { id, kind: 'road', x, z }   one tile.
 // Every tile holds at most one object.
 //
 // API
 //   canPlaceBuilding(type, x, z) -> boolean   in bounds and every footprint tile free
 //   placeBuilding(type, x, z, rotation = 0) -> object | null
-//   removeAt(x, z) -> object | null           removes the whole object covering that tile
+//   placeRoad(x, z) -> object | null        only if in bounds and the tile is free
+//   isRoad(x, z) -> boolean
+//   removeAt(x, z) -> object | null           removes the whole object (building or road) covering that tile
 //   objectAt(x, z) -> object | null
 //   getObjects() -> [object, ...]             live (frozen) objects, in placement order
 //   sizeOf(object) -> footprint side in tiles
@@ -36,13 +38,16 @@ let nextId = 1;
 
 // Per-kind rules: footprint size, and how to rebuild an object from saved data
 // (returns its fields without the id, or null when invalid).
-// Task 4 adds: road: { size: () => 1, fromData: (d) => ({ kind: 'road', x: d.x, z: d.z }) }
 const KINDS = {
   building: {
     size: (o) => getBuilding(o.type).size,
     fromData: (d) => (getBuilding(d.type)
       ? { kind: 'building', type: d.type, x: d.x, z: d.z, rotation: wrapRotation(d.rotation) }
       : null),
+  },
+  road: {
+    size: () => 1,
+    fromData: (d) => ({ kind: 'road', x: d.x, z: d.z }),
   },
 };
 
@@ -104,6 +109,17 @@ export function placeBuilding(type, x, z, rotation = 0) {
   const obj = insert({ kind: 'building', type, x, z, rotation: wrapRotation(rotation) });
   emit({ type: 'add', object: obj });
   return obj;
+}
+
+export function placeRoad(x, z) {
+  const obj = insert({ kind: 'road', x, z });
+  if (obj) emit({ type: 'add', object: obj });
+  return obj;
+}
+
+export function isRoad(x, z) {
+  const obj = objectAt(x, z);
+  return !!obj && obj.kind === 'road';
 }
 
 export function objectAt(x, z) {
